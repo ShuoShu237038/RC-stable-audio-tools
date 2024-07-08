@@ -1,3 +1,4 @@
+
 from setuptools import setup, find_packages
 
 setup(
@@ -21,11 +22,14 @@ setup(
         'importlib-resources==5.12.0',
         'k-diffusion==0.1.1',
         'laion-clap==1.1.4',
+        'librosa==0.10.0',
         'local-attention==1.8.6',
+        'matplotlib==3.7.1',
         'pandas==2.0.2',
         'pedalboard==0.7.4',
         'prefigure==0.0.9',
-        'pytorch_lightning==2.1.0', 
+        'pretty_midi==0.2.9',
+        'pytorch_lightning==2.1.0',
         'PyWavelets==1.4.1',
         'safetensors',
         'sentencepiece==0.1.99',
@@ -39,6 +43,7 @@ setup(
         'vector-quantize-pytorch==1.9.14',
         'wandb==0.15.4',
         'webdataset==0.2.48',
-        'x-transformers<1.27.0'
+        'x-transformers<1.27.0',
+        'basic_pitch==0.2.0'
     ],
 )
