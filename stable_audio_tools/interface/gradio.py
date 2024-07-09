@@ -84,8 +84,7 @@ def convert_audio_to_midi(audio_path, output_dir):
         save_midi=True,
         sonify_midi=False,
         save_model_outputs=False,
-        save_notes=False,
-        model_or_model_path=ICASSP_2022_MODEL_PATH
+        save_notes=False
     )
 
 def plot_piano_roll(pm, start_pitch, end_pitch, fs=100):
@@ -257,27 +256,25 @@ def generate_cond(
     audio_spectrogram = audio_spectrogram_image(audio, sample_rate=sample_rate)
     
     # Convert audio to MIDI
-    convert_audio_to_midi(file_path, output_directory)
-    time.sleep(1)  # Wait to ensure the MIDI file is saved
-
-    midi_files = [f for f in os.listdir(output_directory) if f.endswith('.mid') and base_name in f]
-    if midi_files:
-        midi_files.sort(key=lambda x: os.path.getctime(os.path.join(output_directory, x)))
-        midi_output_path = os.path.join(output_directory, midi_files[-1])
-        print(f"MIDI file saved successfully as {midi_output_path}.")
-    else:
-        print("MIDI file was not found. Please check the conversion process.")
-
-    # Load the generated MIDI file
     try:
+        convert_audio_to_midi(file_path, output_directory)
+        time.sleep(1)  # Wait to ensure the MIDI file is saved
+
+        midi_files = [f for f in os.listdir(output_directory) if f.endswith('.mid') and base_name in f]
+        if midi_files:
+            midi_files.sort(key=lambda x: os.path.getctime(os.path.join(output_directory, x)))
+            midi_output_path = os.path.join(output_directory, midi_files[-1])
+            print(f"MIDI file saved successfully as {midi_output_path}.")
+        else:
+            print("MIDI file was not found. Please check the conversion process.")
+
+        # Load the generated MIDI file
         midi_data = pretty_midi.PrettyMIDI(midi_output_path)
         print("MIDI file loaded successfully.")
         piano_roll_path = plot_piano_roll(midi_data, 21, 109)
-    except FileNotFoundError:
-        print("MIDI file not found. Please check the path.")
-        piano_roll_path = None
     except Exception as e:
-        print(f"An error occurred: {e}")
+        print(f"An error occurred during MIDI conversion: {e}")
+        midi_output_path = None
         piano_roll_path = None
 
     return (file_path, [audio_spectrogram, *preview_images], piano_roll_path, midi_output_path)
