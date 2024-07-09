@@ -1,157 +1,108 @@
-# stable-audio-tools
-Training and inference code for audio generation models
 
-# Install
+# 🎵 RC Stable Audio Tools
 
-The library can be installed from PyPI with:
-```bash
-$ pip install stable-audio-tools
-```
+**Stable Audio Tools** provides training and inference tools for generative audio models from Stability AI. This repository is a fork with additional modifications to enhance functionality (Dynamic Model Loading, MIDI extraction & BPM Locking).
 
-To run the training scripts or inference code, you'll want to clone this repository, navigate to the root, and run:
-```bash
-$ pip install .
-```
+## 🚀 Installation
 
-# Requirements
-Requires PyTorch 2.0 or later for Flash Attention support
+### 📥 Clone the Repository
 
-Development for the repo is done in Python 3.8.10
+First, clone the repository to your local machine:
 
-# Interface
+\```bash
+git clone https://github.com/RoyalCities/RC-stable-audio-tools.git
+cd RC-stable-audio-tools
+\```
 
-A basic Gradio interface is provided to test out trained models. 
+### 🔧 Setup the Environment
 
-For example, to create an interface for the [`stable-audio-open-1.0`](https://huggingface.co/stabilityai/stable-audio-open-1.0) model, once you've accepted the terms for the model on Hugging Face, you can run:
-```bash
-$ python3 ./run_gradio.py --pretrained-name stabilityai/stable-audio-open-1.0
-```
+#### 🌐 Create a Virtual Environment
 
-The `run_gradio.py` script accepts the following command line arguments:
+It's recommended to use a virtual environment to manage dependencies:
 
-- `--pretrained-name`
-  - Hugging Face repository name for a Stable Audio Tools model
-  - Will prioritize `model.safetensors` over `model.ckpt` in the repo
-  - Optional, used in place of `model-config` and `ckpt-path` when using pre-trained model checkpoints on Hugging Face
-- `--model-config`
-  - Path to the model config file for a local model
-- `--ckpt-path`
-  - Path to unwrapped model checkpoint file for a local model
-- `--pretransform-ckpt-path` 
-  - Path to an unwrapped pretransform checkpoint, replaces the pretransform in the model, useful for testing out fine-tuned decoders
-  - Optional
-- `--share`
-  - If true, a publicly shareable link will be created for the Gradio demo
-  - Optional
-- `--username` and `--password`
-  - Used together to set a login for the Gradio demo
-  - Optional
-- `--model-half`
-  - If true, the model weights to half-precision
-  - Optional
+- **Windows:**
 
-# Training
+  \```bash
+  python -m venv venv
+  venv\Scripts\activate
+  \```
 
-## Prerequisites
-Before starting your training run, you'll need a model config file, as well as a dataset config file. For more information about those, refer to the Configurations section below
+- **macOS and Linux:**
 
-The training code also requires a Weights & Biases account to log the training outputs and demos. Create an account and log in with:
-```bash
-$ wandb login
-```
+  \```bash
+  python3 -m venv venv
+  source venv/bin/activate
+  \```
 
-## Start training
-To start a training run, run the `train.py` script in the repo root with:
-```bash
-$ python3 ./train.py --dataset-config /path/to/dataset/config --model-config /path/to/model/config --name harmonai_train
-```
+#### 📦 Install the Required Packages
 
-The `--name` parameter will set the project name for your Weights and Biases run.
+Install Stable Audio Tools and the necessary packages from `setup.py`:
 
-## Training wrappers and model unwrapping
-`stable-audio-tools` uses PyTorch Lightning to facilitate multi-GPU and multi-node training. 
+\```bash
+pip install stable-audio-tools
+pip install .
+\```
 
-When a model is being trained, it is wrapped in a "training wrapper", which is a `pl.LightningModule` that contains all of the relevant objects needed only for training. That includes things like discriminators for autoencoders, EMA copies of models, and all of the optimizer states.
+### 🪟 Additional Step for Windows Users
 
-The checkpoint files created during training include this training wrapper, which greatly increases the size of the checkpoint file.
+To ensure Gradio uses GPU/CUDA and not default to CPU, uninstall and reinstall `torch`, `torchvision`, and `torchaudio` with the correct CUDA version:
 
-`unwrap_model.py` in the repo root will take in a wrapped model checkpoint and save a new checkpoint file including only the model itself.
+\```bash
+pip uninstall -y torch torchvision torchaudio
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+\```
 
-That can be run with from the repo root with:
-```bash
-$ python3 ./unwrap_model.py --model-config /path/to/model/config --ckpt-path /path/to/wrapped/ckpt --name model_unwrap
-```
+## ⚙️ Configuration
 
-Unwrapped model checkpoints are required for:
-  - Inference scripts
-  - Using a model as a pretransform for another model (e.g. using an autoencoder model for latent diffusion)
-  - Fine-tuning a pre-trained model with a modified configuration (i.e. partial initialization)
+A sample `config.json` is included in the root directory. Customize it to specify directories for custom models and outputs (.wav and .mid files will be stored here):
 
-## Fine-tuning
-Fine-tuning a model involves continuning a training run from a pre-trained checkpoint. 
+\```json
+{
+    "model_directory": "models",
+    "output_directory": "generations"
+}
+\```
 
-To continue a training run from a wrapped model checkpoint, you can pass in the checkpoint path to `train.py` with the `--ckpt-path` flag.
+## 🖥️ Usage
 
-To start a fresh training run using a pre-trained unwrapped model, you can pass in the unwrapped checkpoint to `train.py` with the `--pretrained-ckpt-path` flag.
+### 🎚️ Running the Gradio Interface
 
-## Additional training flags
+Start the Gradio interface using a batch file or directly from the command line:
 
-Additional optional flags for `train.py` include:
-- `--config-file`
-  - The path to the defaults.ini file in the repo root, required if running `train.py` from a directory other than the repo root
-- `--pretransform-ckpt-path`
-  - Used in various model types such as latent diffusion models to load a pre-trained autoencoder. Requires an unwrapped model checkpoint.
-- `--save-dir`
-  - The directory in which to save the model checkpoints
-- `--checkpoint-every`
-  - The number of steps between saved checkpoints.
-  - *Default*: 10000
-- `--batch-size`
-  - Number of samples per-GPU during training. Should be set as large as your GPU VRAM will allow.
-  - *Default*: 8
-- `--num-gpus`
-  - Number of GPUs per-node to use for training
-  - *Default*: 1
-- `--num-nodes`
-  - Number of GPU nodes being used for training
-  - *Default*: 1
-- `--accum-batches`
-  - Enables and sets the number of batches for gradient batch accumulation. Useful for increasing effective batch size when training on smaller GPUs.
-- `--strategy`
-  - Multi-GPU strategy for distributed training. Setting to `deepspeed` will enable DeepSpeed ZeRO Stage 2.
-  - *Default*: `ddp` if `--num_gpus` > 1, else None
-- `--precision`
-  - floating-point precision to use during training
-  - *Default*: 16
-- `--num-workers`
-  - Number of CPU workers used by the data loader
-- `--seed`
-  - RNG seed for PyTorch, helps with deterministic training
+- **Batch file example:**
 
-# Configurations
-Training and inference code for `stable-audio-tools` is based around JSON configuration files that define model hyperparameters, training settings, and information about your training dataset.
+  \```batch
+  @echo off
+  cd /d path-to-your-venv/Scripts
+  call activate
+  cd /d path-to-your-stable-audio-tools
+  python run_gradio.py --model-config models/path-to-config/example_config.json --ckpt-path models/path-to-config/example.ckpt
+  pause
+  \```
 
-## Model config
-The model config file defines all of the information needed to load a model for training or inference. It also contains the training configuration needed to fine-tune a model or train from scratch.
+- **Command line:**
 
-The following properties are defined in the top level of the model configuration:
+  \```bash
+  python run_gradio.py --model-config models/path-to-config/example_config.json --ckpt-path models/path-to-config/example.ckpt
+  \```
 
-- `model_type`
-  - The type of model being defined, currently limited to one of `"autoencoder", "diffusion_uncond", "diffusion_cond", "diffusion_cond_inpaint", "diffusion_autoencoder", "lm"`.
-- `sample_size`
-  - The length of the audio provided to the model during training, in samples. For diffusion models, this is also the raw audio sample length used for inference.
-- `sample_rate`
-  - The sample rate of the audio provided to the model during training, and generated during inference, in Hz.
-- `audio_channels`
-  - The number of channels of audio provided to the model during training, and generated during inference. Defaults to 2. Set to 1 for mono.
-- `model`
-  - The specific configuration for the model being defined, varies based on `model_type`
-- `training`
-  - The training configuration for the model, varies based on `model_type`. Provides parameters for training as well as demos.
+### 🎶 Generating Audio and MIDI
 
-## Dataset config
-`stable-audio-tools` currently supports two kinds of data sources: local directories of audio files, and WebDataset datasets stored in Amazon S3. More information can be found in [the dataset config documentation](docs/datasets.md)
+Input prompts in the Gradio interface to generate audio and MIDI files, which will be saved as specified in `config.json`.
 
-# Todo
-- [ ] Add troubleshooting section
-- [ ] Add contribution guidelines 
+The interface has been expanded with BPM/Bar settings (which modify both the user prompt + sample length conditioning), MIDI display/conversion/export along with Dynamic Model Loading. 
+
+Models must be stored inside their own sub folder along with their accompanying config files. i.e. A single finetune could have multiple checkpoints. All related checkpoints could go inside of the same "model1" subfolder but its important their associated config file is included within the same folder as the checkpoint itself.
+
+To switch models simply pick the model you want to load using the drop down and pick "Load Model" 
+
+## 🛠️ Advanced Usage
+
+For detailed instructions on training and inference commands, flags, and additional options, refer to the main GitHub fork documentation:
+[Stable Audio Tools Detailed Usage](https://github.com/RoyalCities/RC-stable-audio-tools)
+
+---
+
+I did my best to make sure the code is OS agnostic but I've only been able to test this with Windows / NVIDIA. Hopefully it works for other operating systems. 
+
+If theres any other features or tooling that you may want let me know on here or contacting me on [Twitter](https://x.com/RoyalCities).
