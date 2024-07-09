@@ -9,10 +9,10 @@
 
 First, clone the repository to your local machine:
 
-\```bash
+```bash
 git clone https://github.com/RoyalCities/RC-stable-audio-tools.git
 cd RC-stable-audio-tools
-\```
+```
 
 ### 🔧 Setup the Environment
 
@@ -22,46 +22,46 @@ It's recommended to use a virtual environment to manage dependencies:
 
 - **Windows:**
 
-  \```bash
+  ```bash
   python -m venv venv
   venv\Scripts\activate
-  \```
+  ```
 
 - **macOS and Linux:**
 
-  \```bash
+  ```bash
   python3 -m venv venv
   source venv/bin/activate
-  \```
+  ```
 
 #### 📦 Install the Required Packages
 
 Install Stable Audio Tools and the necessary packages from `setup.py`:
 
-\```bash
+```bash
 pip install stable-audio-tools
 pip install .
-\```
+```
 
 ### 🪟 Additional Step for Windows Users
 
 To ensure Gradio uses GPU/CUDA and not default to CPU, uninstall and reinstall `torch`, `torchvision`, and `torchaudio` with the correct CUDA version:
 
-\```bash
+```bash
 pip uninstall -y torch torchvision torchaudio
 pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
-\```
+```
 
 ## ⚙️ Configuration
 
 A sample `config.json` is included in the root directory. Customize it to specify directories for custom models and outputs (.wav and .mid files will be stored here):
 
-\```json
+```json
 {
     "model_directory": "models",
     "output_directory": "generations"
 }
-\```
+```
 
 ## 🖥️ Usage
 
@@ -71,20 +71,20 @@ Start the Gradio interface using a batch file or directly from the command line:
 
 - **Batch file example:**
 
-  \```batch
+  ```batch
   @echo off
   cd /d path-to-your-venv/Scripts
   call activate
   cd /d path-to-your-stable-audio-tools
   python run_gradio.py --model-config models/path-to-config/example_config.json --ckpt-path models/path-to-config/example.ckpt
   pause
-  \```
+  ```
 
 - **Command line:**
 
-  \```bash
+  ```bash
   python run_gradio.py --model-config models/path-to-config/example_config.json --ckpt-path models/path-to-config/example.ckpt
-  \```
+  ```
 
 ### 🎶 Generating Audio and MIDI
 
