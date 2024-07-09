@@ -1,7 +1,7 @@
 
 # 🎵 RC Stable Audio Tools
 
-**Stable Audio Tools** provides training and inference tools for generative audio models from Stability AI. This repository is a fork with additional modifications to enhance functionality (Dynamic Model Loading, MIDI extraction & BPM Locking).
+**Stable Audio Tools** provides training and inference tools for generative audio models from Stability AI. This repository is a fork with additional modifications to enhance functionality (Dynamic Model Loading, Persistant Sample Saving, MIDI extraction & BPM Locking).
 
 ## 🚀 Installation
 
@@ -90,11 +90,11 @@ Start the Gradio interface using a batch file or directly from the command line:
 
 Input prompts in the Gradio interface to generate audio and MIDI files, which will be saved as specified in `config.json`.
 
-The interface has been expanded with BPM/Bar settings (which modify both the user prompt + sample length conditioning), MIDI display/conversion/export along with Dynamic Model Loading. 
+The interface has been expanded with Bar/BPM settings (which modifies both the user prompt + sample length conditioning), MIDI display + conversion and also features Dynamic Model Loading. 
 
 Models must be stored inside their own sub folder along with their accompanying config files. i.e. A single finetune could have multiple checkpoints. All related checkpoints could go inside of the same "model1" subfolder but its important their associated config file is included within the same folder as the checkpoint itself.
 
-To switch models simply pick the model you want to load using the drop down and pick "Load Model" 
+To switch models simply pick the model you want to load using the drop down and pick "Load Model". 
 
 ## 🛠️ Advanced Usage
 
@@ -105,4 +105,6 @@ For detailed instructions on training and inference commands, flags, and additio
 
 I did my best to make sure the code is OS agnostic but I've only been able to test this with Windows / NVIDIA. Hopefully it works for other operating systems. 
 
-If theres any other features or tooling that you may want let me know on here or contacting me on [Twitter](https://x.com/RoyalCities).
+If theres any other features or tooling that you may want let me know on here or by contacting me on [Twitter](https://x.com/RoyalCities). I'm just a hobbyist but if it can be done I'll see what I can do.
+
+Have fun!
