@@ -99,7 +99,7 @@ To switch models simply pick the model you want to load using the drop down and 
 ## 🛠️ Advanced Usage
 
 For detailed instructions on training and inference commands, flags, and additional options, refer to the main GitHub fork documentation:
-[Stable Audio Tools Detailed Usage](https://github.com/RoyalCities/RC-stable-audio-tools)
+[Stable Audio Tools Detailed Usage](https://github.com/Stability-AI/stable-audio-tools)
 
 ---
 
