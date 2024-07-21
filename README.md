@@ -1,7 +1,27 @@
 
 # 🎵 RC Stable Audio Tools
 
-**Stable Audio Tools** provides training and inference tools for generative audio models from Stability AI. This repository is a fork with additional modifications to enhance functionality (Dynamic Model Loading, Persistant Sample Saving, MIDI extraction & BPM Locking).
+**Stable Audio Tools** provides training and inference tools for generative audio models from Stability AI. This repository is a fork with additional modifications to enhance functionality such as:
+
+- **Dynamic Model Loading**: Enables dynamic model swaps of the base model and any future community finetune releases.
+
+<center><img src="https://i.imgur.com/kB8CQ3J.gif" alt="Model Loader Gif" width="50%"></center>
+
+- **Random Prompt Button**: A one-click Random Prompt button presently tuned to my Infinite Piano Finetune - as more models are released this will be expanded.
+
+<center><img src="https://i.imgur.com/fNEE8cR.gif" alt="Random Prompt Button Gif" width="80%"></center>
+
+- **BPM & Bar Selector**: BPM & Bar settings tied to the model's timing conditioning, which will auto-fill any prompt with the needed BPM/Bar info. You can also lock or unlock the BPM if you wish to randomize this as well with the Random Prompt button.
+
+<center><img src="https://i.imgur.com/hcedPl5.png" alt="BPM and Bar Example Gif" width="50%"></center>
+
+- **Automatic Sample to MIDI Converter**: The fork will automatically convert all generated samples to .MID format, enabling users to have an infinite source of MIDI.
+
+<center><img src="https://i.imgur.com/R9ipGiq.gif" alt="Midi Converter Example Gif" width="50%"></center>
+
+- **Automatic Sample Trimming**: The fork will automatically trim all generated samples to the exact length desired for easier importing into DAWs.
+
+<center><img src="https://i.imgur.com/ApH5SOM.gif" alt="Midi Converter Example Gif" width="75%"></center> 
 
 ## 🚀 Installation
 
