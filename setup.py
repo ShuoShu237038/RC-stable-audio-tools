@@ -29,6 +29,7 @@ setup(
         'prefigure<=0.0.9',
         'pretty_midi<=0.2.9',
         'pytorch_lightning<=2.1.0',
+        'pydub<=0.25.1',
         'PyWavelets<=1.4.1',
         'safetensors',
         'sentencepiece<=0.1.99',
