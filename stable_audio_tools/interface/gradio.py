@@ -6,12 +6,14 @@ import gradio as gr
 import json
 import torch
 import torchaudio
+import random
 
 from aeiou.viz import audio_spectrogram_image
 from einops import rearrange
 from safetensors.torch import load_file
 from torch.nn import functional as F
 from torchaudio import transforms as T
+from pydub import AudioSegment
 
 from ..inference.generation import generate_diffusion_cond, generate_diffusion_uncond
 from ..models.factory import create_model_from_config
@@ -141,6 +143,7 @@ def generate_cond(
 
     seconds_start = 0
     seconds_total = calculate_seconds_total(bars, bpm)
+    trim_end = seconds_total + 0.1  # Adding 100ms buffer
 
     # Return fake stereo audio
     conditioning = [{"prompt": amended_prompt, "seconds_start": seconds_start, "seconds_total": seconds_total}] * batch_size
@@ -237,6 +240,9 @@ def generate_cond(
     audio = rearrange(audio, "b d n -> d (b n)")
     audio = audio.to(torch.float32).div(torch.max(torch.abs(audio))).clamp(-1, 1).mul(32767).to(torch.int16).cpu()
     
+    # Create spectrogram before saving the WAV file
+    audio_spectrogram = audio_spectrogram_image(audio, sample_rate=sample_rate)
+
     def get_unique_filename(base_name, seed, directory):
         filename = f"{base_name}_{seed}.wav"
         file_path = os.path.join(directory, filename)
@@ -252,12 +258,15 @@ def generate_cond(
     
     torchaudio.save(file_path, audio, sample_rate)
 
-    # Let's look at a nice spectrogram too
-    audio_spectrogram = audio_spectrogram_image(audio, sample_rate=sample_rate)
-    
+    # Trim the audio file using pydub
+    audio_segment = AudioSegment.from_wav(file_path)
+    trimmed_audio_segment = audio_segment[:trim_end * 1000]  # trim_end is in seconds, converting to milliseconds
+    trimmed_file_path = file_path.replace(".wav", "_trimmed.wav")
+    trimmed_audio_segment.export(trimmed_file_path, format="wav")
+
     # Convert audio to MIDI
     try:
-        convert_audio_to_midi(file_path, output_directory)
+        convert_audio_to_midi(trimmed_file_path, output_directory)
         time.sleep(1)  # Wait to ensure the MIDI file is saved
 
         midi_files = [f for f in os.listdir(output_directory) if f.endswith('.mid') and base_name in f]
@@ -277,7 +286,8 @@ def generate_cond(
         midi_output_path = None
         piano_roll_path = None
 
-    return (file_path, [audio_spectrogram, *preview_images], piano_roll_path, midi_output_path)
+    return (trimmed_file_path, [audio_spectrogram, *preview_images], piano_roll_path, midi_output_path)
+
 
 def get_models_and_configs(models_path):
     ckpt_files = []
@@ -323,16 +333,62 @@ def load_model_action(selected_ckpt, selected_config, ckpt_files):
         print(f"Error loading model: {e}")
         return f"Error loading model: {e}"
 
+def generate_random_filename():
+    piano_types = ["Soft E. Piano", "Medium E. Piano", "Grand Piano"]
+    tremolo_effects = ["Low Tremolo", "Medium Tremolo", "High Tremolo", "No Tremolo"]
+    non_tremolo_effects = ["No Reverb", "Low Reverb", "Medium Reverb", "High Reverb", "High Spacey Reverb"]
+
+    chord_progressions = ["simple", "complex", "dance plucky", "fast", "jazzy", "low", "simple strummed", "rising strummed", "complex strummed", "jazzy strummed", "slow strummed", "plucky dance",
+                          "rising", "falling", "slow", "slow jazzy", "fast jazzy", "smooth", "strummed", "plucky"]
+    melodies = [
+        "catchy melody", "complex melody", "complex top melody", "catchy top melody", "top melody", "smooth melody", "catchy complex melody",
+        "jazzy melody", "smooth catchy melody", "plucky dance melody", "dance melody", "alternating low melody", "alternating top arp melody", "alternating top melody", "top arp melody", "alternating melody", "falling arp melody",
+        "rising arp melody", "top catchy melody"
+    ]
+    notes = ["A", "A#", "B", "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#"]
+    scales = ["major,", "minor,"]
+
+    # Choose the piano type first to ensure an even split
+    piano = random.choice(piano_types)
+
+    # Choose effect based on piano type
+    if piano == "Grand Piano":
+        effect = random.choice(non_tremolo_effects)
+    else:
+        effect = random.choice(tremolo_effects + non_tremolo_effects)
+
+    note = random.choice(notes)
+    scale = random.choice(scales)
+
+    # Decide category for generation
+    category_choice = random.choice(["chord progression only", "chord progression with melody", "melody only"])
+    
+    if category_choice == "chord progression only":
+        chord_progression = random.choice(chord_progressions) + " chord progression only,"
+        descriptor = f"{piano}, {chord_progression} {note} {scale} {effect}"
+    elif category_choice == "chord progression with melody":
+        chord_progression = random.choice(chord_progressions) + " chord progression,"
+        melody = "with " + random.choice(melodies) + ","
+        descriptor = f"{piano}, {chord_progression} {melody} {note} {scale} {effect}"
+    else:
+        melody = random.choice(melodies) + " only,"
+        descriptor = f"{piano}, {melody} {note} {scale} {effect}"
+
+    return descriptor
+
 def create_sampling_ui(model_config, initial_ckpt, inpainting=False):
     ckpt_files = get_models_and_configs(config['models_directory'])
     selected_ckpt = gr.State(value=os.path.basename(initial_ckpt))
     selected_config = gr.State()
     
     with gr.Row():
-        with gr.Column(scale=6):
+        with gr.Column(scale=8):  # Input fields take more space
             prompt = gr.Textbox(show_label=False, placeholder="Prompt")
             negative_prompt = gr.Textbox(show_label=False, placeholder="Negative prompt")
-        generate_button = gr.Button("Generate", variant='primary', scale=1)
+        with gr.Column(scale=2):  # Buttons take less space
+            with gr.Column():
+                generate_button = gr.Button("Generate", variant='primary', scale=1)
+                random_prompt_button = gr.Button("Random Prompt", variant='secondary', scale=1)
 
     model_conditioning_config = model_config["model"].get("conditioning", None)
 
@@ -350,6 +406,7 @@ def create_sampling_ui(model_config, initial_ckpt, inpainting=False):
         with gr.Column():
             current_model_info = gr.Markdown(f"Current Model: {selected_ckpt.value}")
             
+            # comment out the model and config dropdowns / load model button for demos
             with gr.Row():
                 # Model and Config dropdowns
                 model_dropdown = gr.Dropdown(["Select Model"] + [file[0] for file in ckpt_files], label="Select Model")
@@ -359,10 +416,10 @@ def create_sampling_ui(model_config, initial_ckpt, inpainting=False):
 
             model_dropdown.change(fn=lambda x: update_config_dropdown(x, ckpt_files), inputs=model_dropdown, outputs=config_dropdown)
 
+            lock_bpm_checkbox = gr.Checkbox(label="Lock BPM Settings", value=True)
             with gr.Row(visible=has_seconds_start or has_seconds_total):
-                # Bar length and BPM dropdowns
-                bars_dropdown = gr.Dropdown([4, 8], label="Bars", value=4, visible=has_seconds_total)
-                bpm_dropdown = gr.Dropdown([100, 110, 120, 128, 130, 140, 145, 150], label="BPM", value=100, visible=has_seconds_total)
+                bars_dropdown = gr.Dropdown([4, 8], label="Bars", value=8, visible=has_seconds_total)  # Set default value here
+                bpm_dropdown = gr.Dropdown([100, 110, 120, 128, 130, 140, 145, 150], label="BPM", value=128, visible=has_seconds_total)  # Set default value here
                 
             with gr.Row():
                 # Steps slider
@@ -473,7 +530,26 @@ def create_sampling_ui(model_config, initial_ckpt, inpainting=False):
 
     send_to_init_button.click(fn=lambda audio: audio, inputs=[audio_output], outputs=[init_audio_input])
 
+    # Comment out the load model button click event
     load_model_button.click(fn=lambda x, y: load_model_action(x, y, ckpt_files), inputs=[model_dropdown, config_dropdown], outputs=[current_model_info])
+
+    def update_prompt(prompt, lock_bpm, bars, bpm):
+        new_prompt = generate_random_filename()
+        # Preserve the original bars and bpm in the prompt only if lock_bpm is True
+        if lock_bpm:
+            return new_prompt, bars, bpm
+        else:
+            # Randomize bars and bpm if not locked
+            bars = random.choice([4, 8])
+            bpm = random.choice([100, 110, 120, 128, 130, 140, 150])
+            return new_prompt, bars, bpm
+
+    random_prompt_button.click(
+        fn=update_prompt,
+        inputs=[prompt, lock_bpm_checkbox, bars_dropdown, bpm_dropdown],
+        outputs=[prompt, bars_dropdown, bpm_dropdown]
+    )
+
 
 def create_txt2audio_ui(model_config, initial_ckpt):
     with gr.Blocks() as ui:
