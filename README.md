@@ -5,23 +5,35 @@
 
 - **Dynamic Model Loading**: Enables dynamic model swaps of the base model and any future community finetune releases.
 
-<center><img src="https://i.imgur.com/kB8CQ3J.gif" alt="Model Loader Gif" width="50%"></center>
+<p align="center">
+  <img src="https://i.imgur.com/kB8CQ3J.gif" alt="Model Loader Gif" width="50%">
+</p>
+
 
 - **Random Prompt Button**: A one-click Random Prompt button presently tuned to my [Infinite Pianos Finetune](https://huggingface.co/RoyalCities/RC_Infinite_Pianos) - as more models are released this will be expanded.
 
-<center><img src="https://i.imgur.com/fNEE8cR.gif" alt="Random Prompt Button Gif" width="80%"></center>
+<p align="center">
+  <img src="https://i.imgur.com/fNEE8cR.gif" alt="Random Prompt Button Gif" width="95%">
+</p>
+
 
 - **BPM & Bar Selector**: BPM & Bar settings tied to the model's timing conditioning, which will auto-fill any prompt with the needed BPM/Bar info. You can also lock or unlock the BPM if you wish to randomize this as well with the Random Prompt button.
 
-<center><img src="https://i.imgur.com/hcedPl5.png" alt="BPM and Bar Example Gif" width="50%"></center>
+<p align="center">
+  <img src="https://i.imgur.com/hcedPl5.png" alt="BPM and Bar Example Gif" width="50%">
+</p>
 
 - **Automatic Sample to MIDI Converter**: The fork will automatically convert all generated samples to .MID format, enabling users to have an infinite source of MIDI.
 
-<center><img src="https://i.imgur.com/R9ipGiq.gif" alt="Midi Converter Example Gif" width="50%"></center>
+<p align="center">
+  <img src="https://i.imgur.com/R9ipGiq.gif" alt="Midi Converter Example Gif" width="50%">
+</p>
 
 - **Automatic Sample Trimming**: The fork will automatically trim all generated samples to the exact length desired for easier importing into DAWs.
 
-<center><img src="https://i.imgur.com/ApH5SOM.gif" alt="Midi Converter Example Gif" width="75%"></center> 
+<p align="center">
+  <img src="https://i.imgur.com/ApH5SOM.gif" alt="Midi Converter Example Gif" width="75%">
+</p>
 
 ## 🚀 Installation
 
