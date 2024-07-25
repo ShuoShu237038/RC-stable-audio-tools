@@ -702,7 +702,6 @@ def create_lm_ui(model_config):
     return ui
 
 def create_ui(model_config_path=None, ckpt_path=None, pretrained_name=None, pretransform_ckpt_path=None, model_half=False):
-
     assert (pretrained_name is not None) ^ (model_config_path is not None and ckpt_path is not None), "Must specify either pretrained name or provide a model config and checkpoint, but not both"
 
     if model_config_path is not None:
@@ -712,13 +711,29 @@ def create_ui(model_config_path=None, ckpt_path=None, pretrained_name=None, pret
     else:
         model_config = None
 
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    _, model_config = load_model(model_config, ckpt_path, pretrained_name=pretrained_name, pretransform_ckpt_path=pretransform_ckpt_path, model_half=model_half, device=device)
+    try:
+        has_mps = platform.system() == "Darwin" and torch.backends.mps.is_available()
+    except Exception:
+        # In case this version of Torch doesn't even have `torch.backends.mps`...
+        has_mps = False
 
+    if has_mps:
+        device = torch.device("mps")
+    elif torch.cuda.is_available():
+        device = torch.device("cuda")
+    else:
+        device = torch.device("cpu")
+
+    print("Using device:", device)
+
+    initial_ckpt = ckpt_path if ckpt_path is not None else pretrained_name
+
+    _, model_config = load_model(model_config, ckpt_path, pretrained_name=pretrained_name, pretransform_ckpt_path=pretransform_ckpt_path, model_half=model_half, device=device)
+    
     model_type = model_config["model_type"]
 
     if model_type == "diffusion_cond":
-        ui = create_txt2audio_ui(model_config, os.path.basename(ckpt_path))
+        ui = create_txt2audio_ui(model_config, initial_ckpt)
     elif model_type == "diffusion_uncond":
         ui = create_diffusion_uncond_ui(model_config)
     elif model_type == "autoencoder" or model_type == "diffusion_autoencoder":
@@ -727,5 +742,6 @@ def create_ui(model_config_path=None, ckpt_path=None, pretrained_name=None, pret
         ui = create_diffusion_prior_ui(model_config)
     elif model_type == "lm":
         ui = create_lm_ui(model_config)
-
+        
     return ui
+
