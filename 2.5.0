@@ -1,0 +1,49 @@
+Collecting aeiou==0.0.20
+  Using cached aeiou-0.0.20-py3-none-any.whl.metadata (3.6 kB)
+Collecting alias-free-torch==0.0.6
+  Using cached alias_free_torch-0.0.6-py3-none-any.whl.metadata (3.8 kB)
+Collecting auraloss==0.4.0
+  Using cached auraloss-0.4.0-py3-none-any.whl.metadata (8.0 kB)
+Collecting descript-audio-codec==1.0.0
+  Using cached descript_audio_codec-1.0.0-py3-none-any.whl.metadata (7.8 kB)
+Collecting einops==0.7.0
+  Using cached einops-0.7.0-py3-none-any.whl.metadata (13 kB)
+Collecting einops-exts==0.0.4
+  Using cached einops_exts-0.0.4-py3-none-any.whl.metadata (621 bytes)
+Collecting ema-pytorch==0.2.3
+  Using cached ema_pytorch-0.2.3-py3-none-any.whl.metadata (693 bytes)
+Collecting encodec==0.1.1
+  Using cached encodec-0.1.1.tar.gz (3.7 MB)
+  Installing build dependencies: started
+  Installing build dependencies: finished with status 'done'
+  Getting requirements to build wheel: started
+  Getting requirements to build wheel: finished with status 'done'
+  Preparing metadata (pyproject.toml): started
+  Preparing metadata (pyproject.toml): finished with status 'done'
+Collecting gradio
+  Using cached gradio-4.42.0-py3-none-any.whl.metadata (15 kB)
+Collecting huggingface-hub
+  Using cached huggingface_hub-0.24.6-py3-none-any.whl.metadata (13 kB)
+Collecting importlib-resources==5.12.0
+  Using cached importlib_resources-5.12.0-py3-none-any.whl.metadata (4.1 kB)
+Collecting k-diffusion==0.1.1
+  Using cached k_diffusion-0.1.1-py3-none-any.whl.metadata (3.9 kB)
+Collecting laion-clap==1.1.4
+  Using cached laion_clap-1.1.4-py3-none-any.whl.metadata (26 kB)
+Collecting local-attention==1.8.6
+  Using cached local_attention-1.8.6-py3-none-any.whl.metadata (684 bytes)
+Collecting pandas==2.0.2
+  Using cached pandas-2.0.2.tar.gz (5.3 MB)
+  Installing build dependencies: started
+  Installing build dependencies: finished with status 'done'
+  Getting requirements to build wheel: started
+  Getting requirements to build wheel: still running...
+  Getting requirements to build wheel: finished with status 'done'
+  Preparing metadata (pyproject.toml): started
+  Preparing metadata (pyproject.toml): finished with status 'done'
+Collecting flash-attn
+  Using cached flash_attn-2.6.3.tar.gz (2.6 MB)
+  Installing build dependencies: started
+  Installing build dependencies: finished with status 'done'
+  Getting requirements to build wheel: started
+  Getting requirements to build wheel: finished with status 'error'
